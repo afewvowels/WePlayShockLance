@@ -1,0 +1,1 @@
+require("prototypes.shock-lance")

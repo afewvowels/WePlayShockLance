@@ -1,0 +1,13 @@
+{
+  "name": "WePlayShockLance",
+  "version": "0.3.0",
+  "title": "WePlay: Shock Lance",
+  "author": "afewvowels",
+  "homepage": "https://github.com/afewvowels/WePlayShockLance",
+  "description": "An energy rifle that fires glowing bolts and slow plasma orbs. Hit an orb with a bolt for a huge shock combo explosion.",
+  "factorio_version": "2.1",
+  "dependencies": [
+    "base >= 2.1",
+    "? space-age"
+  ]
+}

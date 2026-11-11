@@ -1,0 +1,50 @@
+---------------------------------------------------------------------------------------------------
+Version: 0.3.0
+Date: 2026-11-11
+  Features:
+    - Map settings for plasma orb diameter, plasma orb travel distance, shock combo explosion radius, a 1x to 4x damage multiplier, friendly fire (on by default) and clearing trees and rocks (on by default). They can be changed mid-game.
+  Bugfixes:
+    - Bolts and orbs now hit big targets like biter spawners anywhere on their footprint instead of only near the centre, so shots no longer pass over the edges of nests.
+  Changes:
+    - Plasma orbs no longer explode when they touch an enemy; they wink out in a small puff of lavender sparks instead (the contact damage is unchanged).
+    - Plasma orbs fly much farther by default (100 tiles, up from about 33) for long-range combos.
+    - Bolts now fly at least as far as orbs do, so a bolt can always reach a flying orb.
+    - The orb's enemy contact radius and combo catch radius scale with its diameter.
+    - Combo visuals, crater, particles and light scale with the explosion radius.
+    - With friendly fire on, blasts now also damage friendly buildings and vehicles, not just characters.
+    - Shock combos clear trees, rocks and ground decoratives in the blast radius. Nothing drops; trees leave stumps.
+---------------------------------------------------------------------------------------------------
+Version: 0.2.1
+Date: 2026-11-11
+  Changes:
+    - Shock combo and orb blasts now hurt characters caught in the blast radius, including the player who set them off.
+  Bugfixes:
+    - Bolts and orbs now come out of the gun barrel on the player model: the emission point is lower and slightly closer (measured in game).
+---------------------------------------------------------------------------------------------------
+Version: 0.2.0
+Date: 2026-11-11
+  Changes:
+    - Alt fire (plasma orb) now defaults to the right mouse button, with G as the alternate key.
+    - Primary fire is now a short glowing bolt that travels to its target instead of an instant beam. It hits the first enemy in its path (no longer pierces) and sets off a shock combo when it catches an orb mid-flight.
+    - Bolts and orbs now come out of the gun barrel instead of the player's feet.
+  Graphics:
+    - New supernova-style shock combo explosion: a solid, saturated purple volume, a white-hot core with pink and purple light spikes, a lens-flare streak, a wispy expanding shell, a thin tilted equator ring, sparkly lavender haze and spark particles.
+    - The plasma orb now looks like a little plasma-ball toy: a dark glass sphere with animated lightning crawling from a glowing core to the glass, floating sparkles and a glassy highlight.
+    - Shock combos leave a scorched crater. It flashes with a white-hot, layered purple bloom that lights up the ground, fades within a few seconds to a quieter crack glow that cools over 8 seconds, and the crater itself fades away after about a minute.
+    - Removed the vanilla big explosion from the combo.
+  Sounds:
+    - Shock combo is louder and bassier, with a sub-bass thump and rumble layered under it, and can be heard from twice as far away.
+---------------------------------------------------------------------------------------------------
+Version: 0.1.0
+Date: 2026-11-11
+  Major Features:
+    - Initial release.
+    - Shock Lance energy rifle with an instant beam on primary fire.
+    - Alt-fire hotkey (default G or mouse button 4) launches a slow plasma orb.
+    - Shooting an orb with the beam sets off a large shock combo explosion.
+    - Powered by armor batteries instead of ammo: 100 kW while selected, 1.5 MJ per beam or orb, 5 MJ per shock combo.
+    - Internal 10 MJ capacitor charged from spare suit generator output, so generator-only armor works without batteries.
+    - Charge meter in the weapons panel: the bar under the Shock Lance's ammo slot shows suit charge.
+    - Glowing purple charge canister icon in the Shock Lance's ammo slot.
+    - Custom sound effects for the beam, the orb and the shock combo.
+    - Laser damage and laser shooting speed research also apply to the Shock Lance.
