@@ -1,4 +1,15 @@
 ---------------------------------------------------------------------------------------------------
+Version: 0.3.1
+Date: 2026-11-16
+  Graphics:
+    - The Shock Lance is getting a glow up! Bolts are now a soft, blurred capsule with a white-hot core, rounded ends and a wider purple glow, plus a brighter light.
+    - Plasma orbs glow up too: a wide purple halo that breathes with the core, an inner glow along the glass, a soft central highlight, and a light as bright as the bolt's.
+  Balancing:
+    - Bolts fly a little slower: 80 tiles per second, down from 96.
+    - Doubled the bolt fire rate: 2.4 shots per second, up from 1.2.
+  Bugfixes:
+    - Plasma orbs are no longer popped by worm and spitter acid or other enemy projectiles; only enemies with health pop them.
+---------------------------------------------------------------------------------------------------
 Version: 0.3.0
 Date: 2026-11-11
   Features:

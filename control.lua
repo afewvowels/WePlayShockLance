@@ -14,8 +14,9 @@ local COMBO_JOULES = 5000000       -- 5 MJ per shock combo
 local IDLE_INTERVAL = 10           -- ticks between idle drains and charge checks
 
 local BOLT_MIN_RANGE = 40       -- tiles; bolts always reach at least as far as orbs fly
-local BOLT_SPEED = 1.6          -- tiles per tick (40 tiles in 25 ticks)
+local BOLT_SPEED = 80 / 60       -- tiles per tick (80 tiles per second; 40 tiles in 30 ticks)
 local BOLT_LENGTH = 3           -- visible streak length in tiles
+local BOLT_SPRITE_LENGTH = 3.4   -- visible capsule length of the bolt sprites at x_scale 1, in tiles
 local BOLT_HIT_RADIUS = 0.6
 local BOLT_DAMAGE = 45
 local MUZZLE_HEIGHT = 0.75      -- barrel height above the character's feet, in tiles (measured in game)
@@ -37,7 +38,6 @@ local function combo_radius() return setting("wp-shock-lance-combo-radius") end
 local ORB_SPRITE_DIAMETER = 2   -- tiles at scale 1
 
 local PURPLE = { r = 0.62, g = 0.3, b = 1, a = 1 }
-local WHITE_HOT = { r = 0.95, g = 0.85, b = 1, a = 1 }
 
 local function init_storage()
   storage.orbs = storage.orbs or {}
@@ -526,9 +526,13 @@ script.on_event(defines.events.on_script_trigger_effect, function(event)
   end
 
   local start = muzzle(origin, dx, dy)
-  local function line(color, width)
-    return rendering.draw_line({
-      color = color, width = width, from = lifted(start), to = lifted(start), surface = surface,
+  -- The bolt is a blurred capsule sprite plus a soft glow, both pointing east in the image,
+  -- turned to face the shot and stretched to the streak length every tick.
+  local orientation = (math.atan2(dy, dx) / (2 * math.pi)) % 1
+  local function streak(sprite)
+    return rendering.draw_sprite({
+      sprite = sprite, target = lifted(start), surface = surface, render_layer = "air-object",
+      orientation = orientation, x_scale = 0.01, y_scale = 1,
     })
   end
   table.insert(storage.bolts, {
@@ -541,11 +545,11 @@ script.on_event(defines.events.on_script_trigger_effect, function(event)
     force = shooter.force,
     cause = shooter,
     enemies = enemy_forces_of(shooter.force),
-    glow = line(PURPLE, 9),
-    core = line(WHITE_HOT, 3),
+    glow = streak("wp-shock-bolt-glow"),
+    core = streak("wp-shock-bolt-core"),
     light = rendering.draw_light({
       sprite = "utility/light_small", target = lifted(start), surface = surface,
-      scale = 1.5, intensity = 0.8, color = PURPLE,
+      scale = 2.2, intensity = 1, color = PURPLE,
     }),
   })
   -- Muzzle flash.
@@ -626,11 +630,13 @@ local function step_bolt(bolt)
   -- Draw the bolt: a short streak behind the head, never reaching back past the barrel.
   local tail_length = math.min(BOLT_LENGTH, bolt.travelled)
   local tail = { x = to.x - bolt.direction.x * tail_length, y = to.y - bolt.direction.y * tail_length }
-  local head, back = lifted(to), lifted(tail)
+  local head = lifted(to)
+  local middle = lifted({ x = (to.x + tail.x) / 2, y = (to.y + tail.y) / 2 })
+  local stretch = math.max(0.05, tail_length / BOLT_SPRITE_LENGTH)
   for _, key in pairs({ "glow", "core" }) do
     if bolt[key].valid then
-      bolt[key].from = back
-      bolt[key].to = head
+      bolt[key].target = middle
+      bolt[key].x_scale = stretch
     end
   end
   if bolt.light.valid then bolt.light.target = head end
@@ -676,6 +682,19 @@ script.on_event("wp-shock-lance-alt-fire", function(event)
       x_scale = scale, y_scale = scale,
     })
   end
+  -- Layer order matters: wide halo, glass back, lightning, inner glow, core, glass front.
+  local halo = part("wp-shock-orb-halo")
+  local parts = { halo }
+  table.insert(parts, part("wp-shock-orb-glass-back"))
+  table.insert(parts, rendering.draw_animation({
+    animation = "wp-shock-orb-lightning", target = lifted(position), surface = surface, render_layer = "air-object",
+    animation_offset = math.random(0, 15), x_scale = scale, y_scale = scale,
+  }))
+  table.insert(parts, part("wp-shock-orb-inner-glow"))
+  local core = part("wp-shock-orb-core")
+  table.insert(parts, core)
+  table.insert(parts, part("wp-shock-orb-glass-front"))
+
   storage.orbs[id] = {
     surface_index = surface.index,
     position = position,
@@ -687,18 +706,12 @@ script.on_event("wp-shock-lance-alt-fire", function(event)
     force = character.force,
     cause = character,
     enemies = enemy_forces_of(character.force),
-    parts = {
-      part("wp-shock-orb-glass-back"),
-      rendering.draw_animation({
-        animation = "wp-shock-orb-lightning", target = lifted(position), surface = surface, render_layer = "air-object",
-        animation_offset = math.random(0, 15), x_scale = scale, y_scale = scale,
-      }),
-      part("wp-shock-orb-core"),
-      part("wp-shock-orb-glass-front"),
-    },
+    parts = parts,
+    core = core,
+    halo = halo,
     light = rendering.draw_light({
       sprite = "utility/light_medium", target = lifted(position), surface = surface,
-      scale = 1.5 * scale, intensity = 0.9, color = PURPLE,
+      scale = 2 * scale, intensity = 1, color = PURPLE,
     }),
   }
 
@@ -732,20 +745,33 @@ script.on_event(defines.events.on_tick, function(event)
         orb.life = orb.life - 1
         local pulse = 1 + 0.12 * math.sin(event.tick * 0.5)
         local at = lifted(orb.position)
-        for index, part in pairs(orb.parts) do
-          if part.valid then
-            part.target = at
-            if index == 3 then   -- the core electrode pulses
-              part.x_scale = pulse * orb.scale
-              part.y_scale = pulse * orb.scale
-            end
-          end
+        for _, part in pairs(orb.parts) do
+          if part.valid then part.target = at end
+        end
+        if orb.core and orb.core.valid then          -- the core electrode pulses
+          orb.core.x_scale = pulse * orb.scale
+          orb.core.y_scale = pulse * orb.scale
+        end
+        if orb.halo and orb.halo.valid then          -- the halo breathes along with it, more gently
+          local breath = 1 + (pulse - 1) * 0.5
+          orb.halo.x_scale = breath * orb.scale
+          orb.halo.y_scale = breath * orb.scale
         end
         if orb.light.valid then orb.light.target = lifted(orb.position) end
 
-        local hit = #orb.enemies > 0 and surface.find_entities_filtered({
-          area = box_around(orb.position, orb.hit_radius), force = orb.enemies, limit = 1,
-        })[1]
+        -- Only things with health pop the orb (biters, worms, nests, enemy buildings).
+        -- Acid puddles, spit and other projectiles are ignored, so the orb flies through them.
+        local hit = false
+        if #orb.enemies > 0 then
+          for _, entity in pairs(surface.find_entities_filtered({
+            area = box_around(orb.position, orb.hit_radius), force = orb.enemies,
+          })) do
+            if entity.valid and entity.is_entity_with_health and entity.health then
+              hit = true
+              break
+            end
+          end
+        end
         if hit then
           orb_impact(id)
         elseif orb.life <= 0 then

@@ -24,7 +24,7 @@ local prototypes = {
     attack_parameters = {
       type = "projectile",
       ammo_categories = { CATEGORY },
-      cooldown = 50,
+      cooldown = 25,   -- 2.4 shots per second
       movement_slow_down_factor = 0.3,
       range = RANGE,
       sound = { filename = SFX .. "shock-lance-beam.ogg", volume = 0.7 },
@@ -67,6 +67,8 @@ local prototypes = {
   },
 
   -- The plasma orb: a little plasma-ball toy in layers (glass back, lightning, core, glass front).
+  { type = "sprite", name = "wp-shock-orb-halo", filename = GFX .. "entity/orb-halo.png", size = 256, scale = 0.5, blend_mode = "additive" },
+  { type = "sprite", name = "wp-shock-orb-inner-glow", filename = GFX .. "entity/orb-inner-glow.png", size = 128, scale = 0.5, blend_mode = "additive" },
   { type = "sprite", name = "wp-shock-orb-glass-back", filename = GFX .. "entity/orb-glass-back.png", size = 128, scale = 0.5 },
   {
     type = "animation",
@@ -161,6 +163,8 @@ fx_sprite("wp-supernova-core", "supernova-core.png", 512, 512, 0.5, "additive") 
 fx_sprite("wp-supernova-flare", "supernova-flare.png", 1024, 96, 0.5, "additive")     -- 16 x 1.5 tiles
 fx_sprite("wp-supernova-shell", "supernova-shell.png", 512, 512, 0.5, "additive")     -- ring radius 3.2 tiles
 fx_sprite("wp-supernova-equator", "supernova-equator.png", 512, 512, 0.5, "additive") -- ring radius 3.2 tiles
+fx_sprite("wp-shock-bolt-core", "bolt-core.png", 256, 64, 0.5, "additive")         -- blurred capsule, points east
+fx_sprite("wp-shock-bolt-glow", "bolt-glow.png", 256, 128, 0.5, "additive")        -- soft purple halo
 fx_sprite("wp-supernova-volume", "supernova-volume.png", 256, 256, 0.5, "normal")    -- radius 2 tiles
 fx_sprite("wp-supernova-haze", "supernova-haze.png", 256, 256, 0.5, "additive")       -- radius 2 tiles
 fx_sprite("wp-shock-crater", "crater.png", 256, 256, 1, "normal")                     -- radius ~3.4 tiles
